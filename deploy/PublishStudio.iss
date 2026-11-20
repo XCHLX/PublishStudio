@@ -1,4 +1,4 @@
-; PublishStudio 安装包脚本（Inno Setup 6）
+﻿; PublishStudio 安装包脚本（Inno Setup 6）
 ;
 ; 输入：dist\PublishStudio.exe（自包含单文件）+ dist\使用说明.txt
 ; 输出：release\PublishStudio-<版本>-setup.exe
@@ -34,15 +34,24 @@ ArchitecturesAllowed=x64
 ArchitecturesInstallIn64BitMode=x64
 WizardStyle=modern
 
+; GitHub 的 windows runner 预装的 Inno Setup 不含中文语言包，硬引用会编译失败。
+; 本机装了完整版就用中文界面，CI 上找不到就退回英文默认，两边都能编译。
+; CompilerPath 是 ISPP 预定义变量，指向编译器目录，不必猜 Program Files 路径。
+#ifexist CompilerPath + "\Languages\ChineseSimplified.isl"
 [Languages]
 Name: "chinesesimplified"; MessagesFile: "compiler:Languages\ChineseSimplified.isl"
+#else
+[Languages]
+Name: "english"; MessagesFile: "compiler:Default.isl"
+#endif
 
 [Tasks]
 Name: "desktopicon"; Description: "创建桌面快捷方式"; GroupDescription: "附加任务："
 
 [Files]
 Source: "..\dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\dist\使用说明.txt"; DestDir: "{app}"; Flags: ignoreversion
+; 用通配符匹配说明文件，避免脚本里出现中文路径——英文系统的 ANSI 代码页读不了中文文件名。
+Source: "..\dist\*.txt"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\PublishStudio 发布工具"; Filename: "{app}\{#MyAppExeName}"

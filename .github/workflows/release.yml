@@ -6,6 +6,8 @@ on:
   push:
     tags:
       - 'v*'
+  # 手动触发：改完工作流不用删 tag 重推，直接在 Actions 页点 Run workflow 重跑验证。
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -29,11 +31,21 @@ jobs:
         id: ver
         shell: pwsh
         run: |
-          $tag = "${{ github.ref_name }}"
-          $version = $tag -replace '^v', ''
-          if ($version -notmatch '^\d+\.\d+\.\d+$') {
-            throw "tag 必须是 v主.次.补丁 形式，例如 v0.4.0；当前是 $tag"
+          # tag 触发用 tag 名（v0.4.0 -> 0.4.0）；手动触发读 csproj 的 Version。
+          if ("${{ github.ref_type }}" -eq "tag") {
+            $tag = "${{ github.ref_name }}"
+            $version = $tag -replace '^v', ''
+            if ($version -notmatch '^\d+\.\d+\.\d+$') {
+              throw "tag 必须是 v主.次.补丁 形式，例如 v0.4.0；当前是 $tag"
+            }
+          } else {
+            $csproj = Get-Content .\PublishStudio.csproj -Raw
+            if ($csproj -notmatch '<Version>([^<]+)</Version>') {
+              throw "csproj 里找不到 <Version>"
+            }
+            $version = $Matches[1].Trim()
           }
+          Write-Host "版本号: $version"
           "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
       - name: 构建自包含版 + 框架依赖版
@@ -68,6 +80,7 @@ jobs:
       - name: 创建 Release 并上传三个包
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ steps.ver.outputs.version }}
           name: PublishStudio v${{ steps.ver.outputs.version }}
           generate_release_notes: true
           files: |
