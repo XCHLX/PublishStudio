@@ -216,11 +216,14 @@ xcopy /E /I /Y "{output}\publish-zip" "\\192.168.1.10\deploy\%date%"
 | `PublishStudio-<版本>-win-x64-fd.zip` | 在意体积 | 解压，双击 `PublishStudio.exe` | 需装 [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0)（约 2 MB） |
 | `PublishStudio-<版本>-setup.exe` | 想要开始菜单和卸载项 | 双击安装，一路下一步 | 无，内部自带运行时 |
 
-两个 zip 里都带 `使用说明.txt`。框架依赖版（`fd`）还必须保留 `WebView2Loader.dll`，删了「打开发布记录」会打不开。
+三个包里都带同一份 `使用说明.txt`，开篇先让你认领是哪一种包，再分别讲自包含版、依赖环境版、安装版的运行步骤——所以三种包只需要维护这一个说明文件。
 
-三种包都要求系统有 WebView2 Runtime：Win11 自带，Win10 没装时「打开发布记录」窗口会提示安装。
+- **依赖环境版（`fd`）** 必须先装 .NET 8 **Desktop** Runtime（不是 Runtime、也不是 SDK），并且 `WebView2Loader.dll` 要和 exe 放在一起，删了「打开发布记录」会打不开。
+- **安装版** 默认装到 `C:\Program Files\PublishStudio`（要 UAC 提权），建开始菜单组、桌面快捷方式和卸载项；升级直接跑新版 `setup.exe` 覆盖安装，`AppId` 相同会识别成升级，配置不丢。
 
-第一次运行若弹「Windows 已保护你的电脑」，点「更多信息 → 仍要运行」——单文件程序没有代码签名，这是正常提示。
+三种包都要求系统有 WebView2 Runtime：Win11 自带，Win10 没装时「打开发布记录」窗口会提示安装。系统要求 64 位 Windows 10 / 11。
+
+第一次运行若弹「Windows 已保护你的电脑」，点「更多信息 → 仍要运行」——exe 和 `setup.exe` 都没有代码签名，这是正常提示。
 
 ## 本地打包
 
