@@ -1,0 +1,32 @@
+发布工具 使用说明
+========================================
+
+一、运行
+  解压后双击 PublishStudio.exe。不用安装，也不用装 .NET。
+
+二、第一次使用要配三样
+  1. 菜单「设置 → 发布配置」里填：接口地址、网页地址、OSS Key、OSS 密钥
+  2. 右上角「登录」，用内务府账号登录一次
+  3. 「文件 → 新建项目」把项目目录加进来（路径里有中文、空格都没关系）
+
+三、这台机器还需要什么
+  - .NET SDK 8        要编译 .NET 项目必须有（只装运行时不够，编译要 SDK）
+  - Node.js + npm     要编译 Node.js 项目必须有
+  - WebView2 Runtime  Win11 自带；Win10 没装的话「打开发布记录页面」会提示，装一次就好
+  - git               要用右键「git pull」才需要，并且得在 PATH 里
+  - 网络              能访问内务府接口和阿里云 OSS
+
+四、数据和日志在哪
+  配置     %LOCALAPPDATA%\PublishStudio\projects.json、settings.json
+  日志     %TEMP%\PublishStudio\Logs\         （只保留 1 天）
+  临时产物 %TEMP%\PublishStudio\build\        （按「设置」里的天数保留）
+  菜单「帮助」里有打开这些目录的入口。
+
+五、升级
+  先右键托盘图标 →「退出」，再用新的 exe 覆盖旧的，然后重新打开。
+  配置、日志都不会丢。
+
+六、注意
+  1. settings.json 里的 OSS 密钥是明文，别把 %LOCALAPPDATA%\PublishStudio 整个目录发给别人。
+  2. 第一次运行如果弹「Windows 已保护你的电脑」，点「更多信息 → 仍要运行」。
+  3. 关窗口只是缩到右下角托盘，真正退出要走托盘菜单的「退出」。

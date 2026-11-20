@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <!-- 仅为了用 NotifyIcon / ContextMenuStrip 做系统托盘，界面本身全是 WPF -->
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>PublishStudio</RootNamespace>
+    <AssemblyName>PublishStudio</AssemblyName>
+
+    <!--
+      版本号：界面上「帮助 → 关于」显示的是 InformationalVersion（拼成 V0.04）。
+      改版本只改这两行，别在 XAML 里另写一份。
+      Version 必须是规范化的三段式（NuGet 不接受 "0.04"），显示用的 "0.04" 放在 InformationalVersion。
+    -->
+    <Version>0.4.0</Version>
+    <FileVersion>0.4.0.0</FileVersion>
+    <InformationalVersion>0.04</InformationalVersion>
+    <Authors>陈</Authors>
+    <Company>陈</Company>
+    <Product>发布工具</Product>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <SatelliteResourceLanguages>zh-Hans</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <!--
+    UseWindowsForms 会顺手加一条 global using System.Windows.Forms，
+    于是 Application / KeyEventArgs / MessageBox 这些名字和 WPF 里的同名类型撞车。
+    这里把那条全局导入去掉：只有 TrayManager.cs 自己显式 using，其它文件保持纯 WPF。
+  -->
+  <ItemGroup>
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+    <Using Include="System.IO" />
+  </ItemGroup>
+
+  <!--
+    发布/打包走仓库根目录的 build-release.ps1（自包含 + 单文件 + zip）。
+    单文件、自包含这些参数**刻意不写进 csproj**：写进来会让日常 dotnet build / F5 调试也变成
+    RID 专用构建，还得先有 runtime pack。参数只在 publish 时由脚本传，csproj 保持干净。
+  -->
+
+  <!--
+    第三方依赖只有两个：
+    - Aliyun.OSS.SDK.NetCore：发版时要传阿里云 OSS（和 E:\Code\ProjectManager 同版本，保证分片上传行为一致）
+    - Microsoft.Web.WebView2：右键「打开发布记录页面」的内嵌浏览器，依赖目标机上的 WebView2 运行时
+      （Windows 11 自带；单文件发布时 WebView2Loader.dll 要跟着 exe 走）
+  -->
+  <ItemGroup>
+    <PackageReference Include="Aliyun.OSS.SDK.NetCore" Version="2.14.1" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4314.35" />
+  </ItemGroup>
+
+</Project>

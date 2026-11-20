@@ -1,0 +1,76 @@
+<Window x:Class="PublishStudio.Views.PreflightWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="发布前预检" Width="600" SizeToContent="Height" MaxHeight="660"
+        ResizeMode="NoResize" WindowStartupLocation="CenterOwner"
+        FontFamily="Microsoft YaHei UI" Background="White" ShowInTaskbar="False">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="64" />
+        </Grid.RowDefinitions>
+
+        <!-- ========== 标题与结论 ========== -->
+        <StackPanel Margin="26,22,26,0">
+            <TextBlock Text="发布前预检" FontSize="17" FontWeight="SemiBold"
+                       Foreground="{StaticResource TextBrush}" />
+            <TextBlock x:Name="SummaryText" Margin="0,7,0,0" FontSize="12.5" TextWrapping="Wrap" />
+        </StackPanel>
+
+        <!-- ========== 检查项 ========== -->
+        <ScrollViewer Grid.Row="1" MaxHeight="420" VerticalScrollBarVisibility="Auto"
+                      Margin="26,18,26,0">
+            <ItemsControl x:Name="ItemList">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="0,0,0,11">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="20" />
+                                <ColumnDefinition Width="94" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- 结论图标：通过是绿勾，提醒是橙色感叹号，没通过是红叉 -->
+                            <TextBlock Text="{Binding Icon}" FontSize="12.5" FontWeight="Bold"
+                                       VerticalAlignment="Top">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{StaticResource SuccessBrush}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Level}" Value="warn">
+                                                <Setter Property="Foreground" Value="#C77700" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Level}" Value="fail">
+                                                <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+
+                            <TextBlock Grid.Column="1" Text="{Binding Label}" FontSize="12.5"
+                                       Foreground="{StaticResource MutedBrush}" VerticalAlignment="Top" />
+
+                            <TextBlock Grid.Column="2" Text="{Binding Detail}" FontSize="12.5"
+                                       Foreground="{StaticResource TextBrush}" TextWrapping="Wrap" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!-- ========== 按钮区 ========== -->
+        <Border Grid.Row="2" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
+                Margin="0,18,0,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"
+                        Margin="26,0">
+                <Button x:Name="CancelButton" Content="取消" Style="{StaticResource GhostButton}"
+                        Width="88" Margin="0,0,10,0" IsCancel="True" />
+                <Button x:Name="ContinueButton" Content="继续发布" Style="{StaticResource PrimaryButton}"
+                        Width="104" Click="Continue_Click" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

@@ -1,0 +1,25 @@
+<Window x:Class="PublishStudio.Views.WebPageWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        Title="发布记录" Width="1000" Height="750"  MinWidth="900" MinHeight="500" WindowStartupLocation="CenterOwner"
+        FontFamily="Microsoft YaHei UI" Background="White" ResizeMode="CanResize">
+
+    <Grid>
+        <!-- 纯网页：没有地址栏、刷新、在浏览器打开这一行。
+             初始 Hidden 而不是 Visible：内核从拉起进程到渲染出第一帧要一两秒，
+             这段时间先让 WPF 的「正在加载」露出来（WebView2 是独立 HWND，
+             只要它可见就永远盖在 WPF 上面，提示根本看不见）。 -->
+        <wv2:WebView2 x:Name="Browser" DefaultBackgroundColor="White"
+                      Visibility="Hidden" />
+
+        <!-- 加载中 / 内核起不来 / 页面打不开，都盖在网页区域上 -->
+        <Border x:Name="StatusPanel" Background="White">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="520">
+                <TextBlock x:Name="StatusText" FontSize="13" TextWrapping="Wrap"
+                           HorizontalAlignment="Center" TextAlignment="Center"
+                           Foreground="{StaticResource MutedBrush}" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

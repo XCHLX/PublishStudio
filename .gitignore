@@ -1,0 +1,143 @@
+# ==========================================================
+# C# / .NET 项目的 Git 忽略文件（Visual Studio + dotnet CLI）
+# 规则从「构建产物」到「工具临时文件」依次排列
+# ==========================================================
+
+# ---------- 构建产物（编译输出，绝不入库） ----------
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+[Bb]uild/
+[Ll]ogs/
+*.VisualState.xml
+TestResult.xml
+nunit-*.xml
+
+# ---------- 发布 / 打包输出 ----------
+# dist / dist-fd 是 build-release.ps1 的落地目录，属于产物，不入库
+dist/
+dist-fd/
+publish/
+*.publishproj
+PublishScripts/
+*.pubxml
+*.pubxml.user
+
+# ---------- 编译中间文件 ----------
+*.dll
+*.exe
+*.pdb
+*.mdb
+*.obj
+*.o
+*.lo
+*.ilk
+*.cache
+*.tlog
+*.log
+*.tlb
+*.tlh
+*.exp
+*.lib
+*.idb
+*.iobj
+*.ipdb
+*.sbr
+*.bsc
+*.res
+*.resources
+*.pyc
+
+# ---------- Visual Studio / Rider 个人配置 ----------
+.vs/
+.vscode/
+.idea/
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+*.rsuser
+*.dbmdl
+*.dbproj.schemaview
+*.jfm
+Backup*/
+UpgradeLog*.XML
+UpgradeLog*.htm
+_UpgradeReport_Files/
+ServiceFabricBackup/
+FakesAssemblies/
+*.GhostDoc.xml
+*.VC.db
+*.VC.opendb
+*.ncb
+*.aps
+*.opensdf
+*.sdf
+*.ipch
+*.psess
+*.vsp
+*.vspx
+*.sap
+*.gpState
+*.svclog
+*.coverage
+*.coveragexml
+
+# ---------- NuGet ----------
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ---------- 安装程序与临时文件 ----------
+*.msi
+*.msix
+*.msm
+*.msp
+*.cab
+*.7z
+*.zip
+*.rar
+*.tar
+*.gz
+*.ncb
+*.tmp
+*~
+*.swp
+*.bak
+*.orig
+*.rej
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# ---------- 本机密钥 / 本地覆盖 ----------
+# 出现 *.local.json、appsettings.Development.json 之类本地配置时按需保留或忽略
+*.local.json
+secrets.json
+.env
+.env.*
+.workbuddy/
+
+# ---------- 发布产物（脚本生成，不入库） ----------
+dist/

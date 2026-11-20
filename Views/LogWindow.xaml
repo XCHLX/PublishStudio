@@ -1,0 +1,62 @@
+<Window x:Class="PublishStudio.Views.LogWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="日志" Height="450" Width="700" WindowStartupLocation="CenterScreen"
+        FontFamily="Microsoft YaHei UI" Background="White" ShowInTaskbar="True">
+
+    <Window.Resources>
+        <!-- 日志框单独一套模板：全局 TextBox 模板是给单行输入框用的，会把内容垂直居中。 -->
+        <Style x:Key="LogBoxStyle" TargetType="TextBox">
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="AcceptsReturn" Value="True" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="FontFamily" Value="Consolas, Microsoft YaHei UI" />
+            <Setter Property="FontSize" Value="12.5" />
+            <Setter Property="Background" Value="#1E1E1E" />
+            <Setter Property="Foreground" Value="#D6D6D6" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          VerticalScrollBarVisibility="Auto"
+                                          HorizontalScrollBarVisibility="Auto" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="{StaticResource SurfaceBrush}"
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+            <Grid Margin="16,0">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Ellipse x:Name="StatusDot" Width="8" Height="8" Fill="{StaticResource PrimaryBrush}"
+                             Margin="0,0,8,0" />
+                    <TextBlock x:Name="StatusText" Text="运行中" FontSize="13" VerticalAlignment="Center" />
+                    <TextBlock x:Name="ElapsedText" FontSize="12" Foreground="{StaticResource MutedBrush}"
+                               Margin="12,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button x:Name="StopButton" Content="停止" Style="{StaticResource GhostButton}"
+                            Click="Stop_Click" Margin="0,0,8,0" />
+                    <Button Content="复制日志" Style="{StaticResource GhostButton}"
+                            Click="Copy_Click" Margin="0,0,8,0" />
+                    <Button Content="关闭" Style="{StaticResource GhostButton}" Click="Close_Click" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <TextBox Grid.Row="1" x:Name="LogBox" Style="{StaticResource LogBoxStyle}" />
+    </Grid>
+</Window>

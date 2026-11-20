@@ -1,0 +1,75 @@
+name: 发布 Release
+
+# 发版流程：本地改好版本号并提交 → git tag v0.4.0 → git push origin v0.4.0
+# 工作流自动构建三种包、创建 Release、上传附件。
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # tag 形如 v0.4.0，去掉开头的 v 作为版本号传给脚本；
+      # 版本号同时决定 zip/setup 的文件名和 exe「关于」窗口里显示的版本。
+      - name: 解析版本号
+        id: ver
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $version = $tag -replace '^v', ''
+          if ($version -notmatch '^\d+\.\d+\.\d+$') {
+            throw "tag 必须是 v主.次.补丁 形式，例如 v0.4.0；当前是 $tag"
+          }
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: 构建自包含版 + 框架依赖版
+        shell: pwsh
+        run: |
+          .\build-release.ps1 -Flavor All -Version "${{ steps.ver.outputs.version }}"
+
+      # GitHub 的 windows-latest 镜像预装 Inno Setup 6。
+      # 找不到就直接报错——绝不在 CI 里自动下载安装。
+      - name: 编译安装包
+        shell: pwsh
+        run: |
+          $iscc = @(
+            "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
+            "${env:ProgramFiles}\Inno Setup 6\ISCC.exe"
+          ) | Where-Object { Test-Path $_ } | Select-Object -First 1
+
+          if (-not $iscc) {
+            throw "构建机上找不到 Inno Setup 6 的 ISCC.exe，请确认镜像是否预装。"
+          }
+
+          Write-Host "使用 ISCC: $iscc"
+          & $iscc "/DMyAppVersion=${{ steps.ver.outputs.version }}" "deploy\PublishStudio.iss"
+          if ($LASTEXITCODE -ne 0) {
+            throw "Inno Setup 编译失败，退出码 $LASTEXITCODE"
+          }
+
+      - name: 列出产物
+        shell: pwsh
+        run: Get-ChildItem .\release\*.zip, .\release\*.exe | Select-Object Name, Length
+
+      - name: 创建 Release 并上传三个包
+        uses: softprops/action-gh-release@v2
+        with:
+          name: PublishStudio v${{ steps.ver.outputs.version }}
+          generate_release_notes: true
+          files: |
+            release/*.zip
+            release/*.exe

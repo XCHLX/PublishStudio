@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="400" viewBox="0 0 1200 400" role="img" aria-labelledby="heroTitle heroDesc">
+  <title id="heroTitle">PublishStudio 发布工具</title>
+  <desc id="heroDesc">左侧是项目名与一句话说明：选中项目，一条流水线走完编译、打包、上传、登记。右侧是一次真实编译的终端输出，3420 个模块、1.0 MB 压缩包、用时 20 秒。</desc>
+
+  <rect width="1200" height="400" rx="24" fill="#0B0E12"/>
+
+  <g id="title-block" transform="translate(64 0)">
+    <text x="0" y="78" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="16" letter-spacing="2.2" fill="#6E7A8A">DESKTOP RELEASE TOOL · .NET 8 / WPF</text>
+
+    <text x="0" y="150" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Microsoft YaHei UI, sans-serif" font-size="56" font-weight="700" fill="#E8EDF4">PublishStudio</text>
+
+    <text x="0" y="194" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Microsoft YaHei UI, sans-serif" font-size="23" fill="#C7D1DE">选中项目，一条流水线走完</text>
+
+    <text x="0" y="226" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Microsoft YaHei UI, sans-serif" font-size="23" fill="#3D9BEF">编译 → 打包 → 上传 → 登记</text>
+
+    <text x="0" y="264" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Microsoft YaHei UI, sans-serif" font-size="19" fill="#8A96A8">常驻托盘随时发版，每次输出自动落盘成日志</text>
+
+    <line x1="0" y1="298" x2="536" y2="298" stroke="#1E242E" stroke-width="1"/>
+
+    <text x="0" y="330" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="17" fill="#6E7A8A">自包含单文件 · 目标机免装运行时 · 日志保留 1 天</text>
+  </g>
+
+  <g id="proof-terminal" transform="translate(640 56)">
+    <rect width="496" height="288" rx="14" fill="#14181F" stroke="#232A35" stroke-width="1"/>
+
+    <g id="terminal-bar">
+      <circle cx="26" cy="28" r="5" fill="#2A313C"/>
+      <circle cx="44" cy="28" r="5" fill="#2A313C"/>
+      <circle cx="62" cy="28" r="5" fill="#2A313C"/>
+      <text x="84" y="34" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="17" fill="#8A96A8">编译 - full_nwf</text>
+      <text x="470" y="34" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="17" fill="#6E7A8A">20s</text>
+      <line x1="0" y1="52" x2="496" y2="52" stroke="#232A35" stroke-width="1"/>
+    </g>
+
+    <g id="terminal-lines" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="18">
+      <text x="24" y="90" fill="#3D9BEF">&gt;</text>
+      <text x="46" y="90" fill="#C7D1DE">npm run build</text>
+
+      <text x="24" y="128" fill="#2EA043">✓</text>
+      <text x="46" y="128" fill="#C7D1DE">3420 modules transformed</text>
+
+      <text x="24" y="166" fill="#2EA043">✓</text>
+      <text x="46" y="166" fill="#C7D1DE">publish-zip/full_nwf.zip</text>
+      <text x="470" y="166" text-anchor="end" fill="#8A96A8">1.0 MB</text>
+
+      <text x="24" y="204" fill="#2EA043">✓</text>
+      <text x="46" y="204" fill="#C7D1DE">已删除 6 项产物 · 释放 3.1 MB</text>
+    </g>
+
+    <line x1="24" y1="228" x2="472" y2="228" stroke="#232A35" stroke-width="1"/>
+
+    <g id="terminal-status">
+      <circle cx="30" cy="256" r="6" fill="#2EA043"/>
+      <text x="48" y="263" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Microsoft YaHei UI, sans-serif" font-size="19" fill="#2EA043">成功，用时 20 秒</text>
+    </g>
+  </g>
+</svg>
