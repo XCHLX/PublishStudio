@@ -188,7 +188,7 @@ vite v5.0.11 building for production...
 | `<FileVersion>` | `0.4.0.0` | Windows 文件版本，四段式 |
 | `<InformationalVersion>` | `0.4.0` | 「帮助 → 关于」里显示的 `V0.4.0`；发布时脚本会用 tag 版本覆盖它，所以格式必须和 `<Version>` 一致 |
 
-**2. 写版本说明**：新建 `docs/release-notes/v<版本>.md`（如 `v0.4.0.md`），写这次改了什么、下载哪个包、已知限制。这份文件会作为 Release 正文，GitHub 自动生成的 changelog 追加在它后面。**缺这个文件工作流会直接失败**，不会发出空说明的 Release。
+**2. 写版本说明**：新建 `docs/release-notes/v<版本>.md`（如 `v0.4.0.md`），写这次改了什么、下载哪个包、已知限制。这份文件会作为 Release 正文，GitHub 自动生成的 changelog 追加在它后面。**没写也能发**——会自动退回通用说明 `docs/release-notes/v.md`，其中的 `{{VERSION}}` 会被替换成实际版本号，包名不会写错；只有两份文件都不存在时工作流才失败。
 
 **3. 提交并打 tag**：tag 名必须是 `v` + 三段式版本号（如 `v0.4.0`），工作流会校验格式。
 
@@ -203,12 +203,12 @@ git push origin v0.4.0
 **4. 自动构建**：push tag 触发 `.github/workflows/release.yml`，它依次做：
 
 - 检出代码、装 .NET 8 SDK、从 tag 解析版本号
-- 校验 `docs/release-notes/v<版本>.md` 存在并读取
+- 读取 `docs/release-notes/v<版本>.md`；没有则用通用说明 `docs/release-notes/v.md`
 - 跑 `build-release.ps1 -Flavor All` 出两个 zip
 - 用构建机预装的 Inno Setup 编译 `setup.exe`
 - 创建 Release，正文用版本说明，上传三个包
 
-进度在仓库的 **Actions** 页看。失败通常是 tag 格式不对、版本说明没写、或 Inno Setup 没预装，日志里会写明。
+进度在仓库的 **Actions** 页看。失败通常是 tag 格式不对、两份版本说明都不存在、或 Inno Setup 没预装，日志里会写明。
 
 **5. 核对**：到 Releases 页确认三个附件都在、说明正文正常、版本号对，再下载一个 zip 解压试跑。
 

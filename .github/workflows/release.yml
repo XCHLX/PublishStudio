@@ -49,17 +49,31 @@ jobs:
           "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
       # 每个版本的发行说明写在 docs/release-notes/v<版本>.md。
-      # 缺文件直接失败——避免发出一个只有自动 changelog 的空 Release。
+      # 找不到就用通用说明 docs/release-notes/v.md，其中的 {{VERSION}} 会替换成实际版本号，
+      # 这样通用说明里的包名（如 PublishStudio-{{VERSION}}-win-x64.zip）始终和本次产物对得上。
       - name: 检查版本说明
         id: notes
         shell: pwsh
         run: |
-          $path = "docs/release-notes/v${{ steps.ver.outputs.version }}.md"
-          if (-not (Test-Path $path)) {
-            throw "缺少版本说明：$path。发版前先写这份文件（复制上一版改即可）。"
+          $version  = "${{ steps.ver.outputs.version }}"
+          $specific = "docs/release-notes/v$version.md"
+          $fallback = "docs/release-notes/v.md"
+
+          if (Test-Path $specific) {
+            $body = $specific
+            Write-Host "使用该版本专属说明: $body"
           }
-          Write-Host "使用版本说明: $path"
-          "body_path=$path" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          elseif (Test-Path $fallback) {
+            $body = Join-Path $env:RUNNER_TEMP "release-notes.md"
+            (Get-Content $fallback -Raw -Encoding utf8) -replace '\{\{VERSION\}\}', $version |
+              Set-Content -Path $body -Encoding utf8
+            Write-Host "::notice::没有 $specific，改用通用说明 $fallback（版本占位符已替换为 $version）"
+          }
+          else {
+            throw "缺少版本说明：$specific 和通用说明 $fallback 都不存在。至少写一份再发版。"
+          }
+
+          "body_path=$body" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
       - name: 构建自包含版 + 框架依赖版
         shell: pwsh

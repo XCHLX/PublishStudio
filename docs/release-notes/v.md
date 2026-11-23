@@ -1,0 +1,29 @@
+## 下载哪个包
+
+| 包 | 适合谁 | 前提 | 体积 |
+|---|---|---|---|
+| `PublishStudio-{{VERSION}}-win-x64.zip` | 大多数人 | 无需装 .NET | 58.8 MB |
+| `PublishStudio-{{VERSION}}-win-x64-fd.zip` | 在意体积 | 需 .NET 8 **Desktop** Runtime | 845 KB |
+| `PublishStudio-{{VERSION}}-setup.exe` | 想要开始菜单和卸载项 | 无需装 .NET，装到 `C:\Program Files\PublishStudio` | 59.4 MB |
+
+三个包功能一致。包内都带 `使用说明.txt`，开篇按包类型分别讲运行步骤。
+
+## 系统要求
+
+- 64 位 Windows 10 / 11
+- WebView2 Runtime：Win11 自带；Win10 未装时「打开发布记录」会提示，装一次即可
+- 要编译 .NET 项目需要 .NET SDK  ；要编译 Node.js 项目需要 Node.js + npm + nvm
+
+## 已知限制
+
+- 发布信息查询与发布记录登记依赖内务府（NWF）接口和指定的 OSS 桶。**没有这套内部系统时，「发布打包」走不通，只有「运行 / 编译」能用。**
+- 流水线顺序固定，不能增删步骤。
+- `settings.json` 中的 OSS 密钥为明文存储。
+- 没有代码签名，首次运行会出现 SmartScreen 提示（「更多信息 → 仍要运行」）。
+
+## 升级
+
+- **zip 版**：托盘右键退出 → 用新的 exe 覆盖旧的 → 重新打开。
+- **安装版**：直接运行新版 `setup.exe` 覆盖安装，`AppId` 相同会识别为升级。
+
+配置（`%LOCALAPPDATA%\PublishStudio`）和日志都不会丢。
