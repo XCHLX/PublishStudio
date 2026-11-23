@@ -48,6 +48,19 @@ jobs:
           Write-Host "版本号: $version"
           "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
+      # 每个版本的发行说明写在 docs/release-notes/v<版本>.md。
+      # 缺文件直接失败——避免发出一个只有自动 changelog 的空 Release。
+      - name: 检查版本说明
+        id: notes
+        shell: pwsh
+        run: |
+          $path = "docs/release-notes/v${{ steps.ver.outputs.version }}.md"
+          if (-not (Test-Path $path)) {
+            throw "缺少版本说明：$path。发版前先写这份文件（复制上一版改即可）。"
+          }
+          Write-Host "使用版本说明: $path"
+          "body_path=$path" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
       - name: 构建自包含版 + 框架依赖版
         shell: pwsh
         run: |
@@ -82,6 +95,8 @@ jobs:
         with:
           tag_name: v${{ steps.ver.outputs.version }}
           name: PublishStudio v${{ steps.ver.outputs.version }}
+          # 自己写的版本说明在前，GitHub 自动生成的 changelog 追加在后（含 Full Changelog 链接）。
+          body_path: ${{ steps.notes.outputs.body_path }}
           generate_release_notes: true
           files: |
             release/*.zip
