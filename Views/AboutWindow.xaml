@@ -18,9 +18,21 @@
                 <TextBlock Text="发布工具" FontSize="19" FontWeight="SemiBold"
                            Foreground="{StaticResource TextBrush}" />
                 <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                    <!-- Text 由后台按程序集版本填写（见 AboutWindow.xaml.cs），这里只是设计期占位，别在 XAML 里写死版本号。 -->
+                    <!-- Text 由后台按程序集版本填写（见 AboutWindow.xaml.cs），这里只是设计期占位，别在 XAML 里写死版本号。
+                         点击版本号打开 GitHub 发布页：查到新版本时直接打开那个版本，否则打开发布列表。 -->
                     <TextBlock x:Name="VersionText" Text="V" FontSize="12.5" FontWeight="SemiBold"
-                               Foreground="{StaticResource PrimaryBrush}" />
+                               Foreground="{StaticResource PrimaryBrush}" Cursor="Hand"
+                               ToolTip="打开 GitHub 发布页" MouseLeftButtonUp="VersionText_Click">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="TextDecorations" Value="Underline" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
                     <TextBlock Text="· 编译 / 打包 / 上传 / 回调，一条流水线" FontSize="12.5"
                                Foreground="{StaticResource MutedBrush}" Margin="8,0,0,0" />
                 </StackPanel>
@@ -49,6 +61,27 @@
             </ItemsControl.ItemTemplate>
         </ItemsControl>
 
+        <!-- 版本检测：打开窗口自动查一次，也可以点底部「检查更新」重查。查不到只显示一行提示，不影响其它内容。
+             颜色由后台 SetStatus 决定：有新版是红色（含「去下载」），已最新是绿色，其余是灰色。 -->
+        <StackPanel Orientation="Horizontal" Margin="28,2,28,0">
+            <TextBlock x:Name="UpdateText" Text="正在检查更新…" FontSize="11.5"
+                       Foreground="{StaticResource MutedBrush}" VerticalAlignment="Center" />
+            <TextBlock x:Name="UpdateLink" Text="去下载" FontSize="11.5" FontWeight="SemiBold" Margin="8,0,0,0"
+                       Foreground="{StaticResource PrimaryBrush}" Cursor="Hand"
+                       VerticalAlignment="Center" Visibility="Collapsed"
+                       MouseLeftButtonUp="UpdateLink_Click">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="TextDecorations" Value="Underline" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </StackPanel>
+
         <TextBlock x:Name="FooterHint" Margin="28,8,28,0" FontSize="11.5" TextWrapping="Wrap"
                    Foreground="{StaticResource MutedBrush}"
                    Text="配置和数据都保存在本机，不会上传。settings.json 是明文 JSON（含 OSS 密钥），别把这个文件发给别人。" />
@@ -58,6 +91,8 @@
                 Margin="0,20,0,0">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"
                         Margin="28,0">
+                <Button x:Name="CheckButton" Content="检查更新" Style="{StaticResource GhostButton}"
+                        Width="96" Click="Check_Click" Margin="0,0,10,0" />
                 <Button x:Name="CopyButton" Content="复制信息" Style="{StaticResource GhostButton}"
                         Width="96" Click="Copy_Click" Margin="0,0,10,0" />
                 <Button Content="关闭" Style="{StaticResource PrimaryButton}" Width="88" Click="Close_Click" />

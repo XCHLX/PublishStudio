@@ -45,6 +45,13 @@ jobs:
             }
             $version = $Matches[1].Trim()
           }
+          # tag 与 csproj 版本不一致时给警告：本地启动读的是 csproj，
+          # 不同步的话会出现「本地显示 V0.4.0、发布出来是 V0.0.7」这种错觉。
+          $csprojVersion = ([regex]::Match((Get-Content .\PublishStudio.csproj -Raw), '<Version>([^<]+)</Version>')).Groups[1].Value.Trim()
+          if ($csprojVersion -ne $version) {
+            Write-Host "::warning::csproj 的 <Version> 是 $csprojVersion，与 tag 的 $version 不一致；本地启动会显示 V$csprojVersion。建议改用 .\release.ps1 -Version $version 发版。"
+          }
+
           Write-Host "版本号: $version"
           "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 

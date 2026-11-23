@@ -1,7 +1,10 @@
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
+using System.Windows.Input;
+using System.Windows.Media;
 using PublishStudio.Core;
 
 namespace PublishStudio.Views;
@@ -15,8 +18,15 @@ public partial class AboutWindow : Window
 {
     private readonly List<AboutItem> _items;
 
+    /// <summary>最新版本的发布页地址，点「去下载」时用；没查到时为空。</summary>
+    private string _releaseUrl = "";
+
+    /// <summary>正在检查的标记，挡住自动检查与手动点击同时发两个请求。</summary>
+    private bool _checking;
+
     /// <summary>
     /// 收集信息并显示。项目数量、登录账号这些取自当前配置，所以要把 <see cref="AppStore"/> 传进来。
+    /// 窗口显示后自动查一次最新版本，查不到只影响底部那行提示。
     /// </summary>
     /// <param name="store">全局项目清单与发布配置。</param>
     public AboutWindow(AppStore store)
@@ -28,6 +38,8 @@ public partial class AboutWindow : Window
         var version = AppVersion();
         VersionText.Text = $"V{version}";
         InfoList.ItemsSource = _items;
+
+        Loaded += async (_, _) => await CheckAsync();
     }
 
     /// <summary>拼出所有要显示的信息行；顺序就是界面上的顺序。</summary>
@@ -72,6 +84,109 @@ public partial class AboutWindow : Window
         var plus = raw.IndexOf('+');
         return plus > 0 ? raw[..plus] : raw;
     }
+
+    /// <summary>
+    /// 查询 GitHub 上的最新版本并更新底部状态行。检查期间禁用按钮，避免连点发出多个请求。
+    /// 任何失败都只改这一行文字，不弹框、不影响窗口其它内容。
+    /// </summary>
+    private async Task CheckAsync()
+    {
+        if (_checking) return;
+
+        _checking = true;
+        CheckButton.IsEnabled = false;
+
+        // 每次检查先回到默认外观，避免上一次的红色残留。
+        var primary = (Brush)FindResource("PrimaryBrush");
+        VersionText.Foreground = primary;
+        VersionText.ToolTip = "打开 GitHub 发布页";
+        SetStatus("正在检查更新…", null);
+
+        try
+        {
+            var result = await UpdateChecker.CheckAsync(AppVersion());
+
+            if (result is null)
+            {
+                SetStatus("无法检查更新（网络不可用或被 GitHub 限流）", null);
+            }
+            else if (result.HasUpdate)
+            {
+                // 有新版本：版本号和提示行一起转红，右边跟一个「去下载」。
+                _releaseUrl = result.ReleaseUrl;
+                VersionText.Foreground = (Brush)FindResource("DangerBrush");
+                VersionText.ToolTip = $"打开 V{result.Latest} 的发布页";
+                SetStatus($"发现新版本 V{result.Latest}", "去下载", "DangerBrush");
+            }
+            else
+            {
+                SetStatus($"已是最新版本（V{result.Latest}）", null, "SuccessBrush");
+            }
+        }
+        catch (Exception ex)
+        {
+            // 兜底：这里跑在 async void 的事件里，漏出去的异常会让整个程序崩掉。
+            Debug.WriteLine($"[AboutWindow] 检查更新异常: {ex.Message}");
+            SetStatus("无法检查更新（网络不可用或被 GitHub 限流）", null);
+        }
+        finally
+        {
+            _checking = false;
+            CheckButton.IsEnabled = true;
+        }
+    }
+
+    /// <summary>更新底部状态行，并决定要不要显示「去下载」。</summary>
+    /// <param name="text">状态文字。</param>
+    /// <param name="linkText">链接文字；为 <c>null</c> 时隐藏链接。</param>
+    /// <param name="brushKey">文字颜色，取 Theme.xaml 里的画刷键。文字和链接用同一个颜色（有新版时是红色）。</param>
+    private void SetStatus(string text, string? linkText, string brushKey = "MutedBrush")
+    {
+        var brush = (Brush)FindResource(brushKey);
+
+        UpdateText.Text = text;
+        UpdateText.Foreground = brush;
+        UpdateLink.Foreground = brush;
+
+        if (linkText is null)
+        {
+            UpdateLink.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        UpdateLink.Text = linkText;
+        UpdateLink.Visibility = Visibility.Visible;
+    }
+
+    /// <summary>「检查更新」按钮：手动重查一次（自动检查失败后可以点它重试）。</summary>
+    /// <param name="sender">事件源（这里用不到）。</param>
+    /// <param name="e">事件参数（这里用不到）。</param>
+    private async void Check_Click(object sender, RoutedEventArgs e) => await CheckAsync();
+
+    /// <summary>用默认浏览器打开发布页：查到新版本就打开那个版本的页面，否则打开 Releases 列表。</summary>
+    private void OpenReleasePage()
+    {
+        var url = _releaseUrl.Length > 0 ? _releaseUrl : UpdateChecker.ReleasesUrl;
+
+        try
+        {
+            Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[AboutWindow] 打开发布页失败: {ex.Message}");
+        }
+    }
+
+    /// <summary>「去下载」链接。</summary>
+    /// <param name="sender">事件源（这里用不到）。</param>
+    /// <param name="e">事件参数（这里用不到）。</param>
+    private void UpdateLink_Click(object sender, MouseButtonEventArgs e) => OpenReleasePage();
+
+    /// <summary>点顶部版本号，效果同「去下载」。</summary>
+    /// <param name="sender">事件源（这里用不到）。</param>
+    /// <param name="e">事件参数（这里用不到）。</param>
+    private void VersionText_Click(object sender, MouseButtonEventArgs e) => OpenReleasePage();
 
     /// <summary>「复制信息」：把上面这些行拼成纯文本放进剪贴板，方便贴到群里反馈问题。</summary>
     /// <param name="sender">事件源（这里用不到）。</param>

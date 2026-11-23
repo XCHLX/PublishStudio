@@ -34,6 +34,7 @@
 - 🧩 **多项目** —— 同一个项目同时只允许一个任务，不同项目可以并行；托盘按自定义分组排菜单。
 - 🧰 **内嵌发布记录页** —— WebView2 窗口直接看当前项目的发布记录，不用切浏览器。
 - 🔍 **日志实时可见并落盘** —— 界面上滚出来的每一行都同时写文件，事后能翻。
+- 🔄 **版本检测** —— 「帮助 → 关于」打开时自动查 GitHub 最新发布；有新版本时版本号和提示行转为红色，点「去下载」或版本号直接打开浏览器。查不到只提示一行，不影响使用。
 
 ## 下载与安装
 
@@ -178,29 +179,52 @@ vite v5.0.11 building for production...
 
 ## 发版（维护 Release）
 
-版本维护靠 **tag**，不用在 GitHub 网页上手点上传。流程固定为五步：
+一条命令搞定，**版本号和 tag 在同一次提交里对齐**：
 
-**1. 改版本号**：`PublishStudio.csproj` 里三行一起改，保持对应：
+```powershell
+.\release.ps1 -Version 0.0.7
+```
+
+它按顺序做四件事：
+
+1. 校验版本格式（三段式、不带 `v`）以及 tag 是否重名（本地 + 远端）
+2. 改 `PublishStudio.csproj` 的 `Version` / `FileVersion` / `InformationalVersion`
+3. `git commit` → `git tag v0.0.7`
+4. `git push` 分支和 tag，触发 Actions 自动构建三个包并创建 Release
+
+前提是**工作区干净**（业务改动先自己提交，版本号改动单独成一次提交）。只想本地留个 tag 不推送，加 `-SkipPush`。
+
+这样本地 F5、CI 产出的包、Release 页上的版本号是同一个数，不会再出现「本地显示 V0.4.0、发布出来是 V0.0.6」。
+
+### 脚本背后做了什么
 
 | 字段 | 示例 | 用途 |
 |---|---|---|
-| `<Version>` | `0.4.0` | 必须规范三段式，tag 和文件名用它 |
-| `<FileVersion>` | `0.4.0.0` | Windows 文件版本，四段式 |
-| `<InformationalVersion>` | `0.4.0` | 「帮助 → 关于」里显示的 `V0.4.0`；发布时脚本会用 tag 版本覆盖它，所以格式必须和 `<Version>` 一致 |
+| `<Version>` | `0.0.7` | 三段式，tag 和包名用它 |
+| `<FileVersion>` | `0.0.7.0` | Windows 文件属性里的版本 |
+| `<InformationalVersion>` | `0.0.7` | 「帮助 → 关于」显示 `V0.0.7` |
 
-**2. 写版本说明**：新建 `docs/release-notes/v<版本>.md`（如 `v0.4.0.md`），写这次改了什么、下载哪个包、已知限制。这份文件会作为 Release 正文，GitHub 自动生成的 changelog 追加在它后面。**没写也能发**——会自动退回通用说明 `docs/release-notes/v.md`，其中的 `{{VERSION}}` 会被替换成实际版本号，包名不会写错；只有两份文件都不存在时工作流才失败。
-
-**3. 提交并打 tag**：tag 名必须是 `v` + 三段式版本号（如 `v0.4.0`），工作流会校验格式。
+对应手动流程（不想用脚本时）：
 
 ```bash
-git add .
-git commit -m "chore: release v0.4.0"
-git tag v0.4.0
+# 1. 手改 csproj 三行
+# 2. 提交 + 打 tag + 推送
+git add PublishStudio.csproj
+git commit -m "chore: release v0.0.7"
+git tag v0.0.7
 git push origin main
-git push origin v0.4.0
+git push origin v0.0.7
 ```
 
-**4. 自动构建**：push tag 触发 `.github/workflows/release.yml`，它依次做：
+tag 名必须是 `v` + 三段式版本号，工作流会校验格式；tag 与 csproj 版本不一致时 Actions 日志里会出现 `::warning::` 提醒。
+
+### 版本说明
+
+新建 `docs/release-notes/v<版本>.md`（如 `v0.0.7.md`），写这次改了什么、下载哪个包、已知限制。这份文件作为 Release 正文，GitHub 自动生成的 changelog 追加在它后面。**没写也能发**——会自动退回通用说明 `docs/release-notes/v.md`，其中的 `{{VERSION}}` 会被替换成实际版本号；只有两份都不存在时工作流才失败。
+
+### 自动构建
+
+push tag 触发 `.github/workflows/release.yml`，它依次做：
 
 - 检出代码、装 .NET 8 SDK、从 tag 解析版本号
 - 读取 `docs/release-notes/v<版本>.md`；没有则用通用说明 `docs/release-notes/v.md`
@@ -210,9 +234,11 @@ git push origin v0.4.0
 
 进度在仓库的 **Actions** 页看。失败通常是 tag 格式不对、两份版本说明都不存在、或 Inno Setup 没预装，日志里会写明。
 
-**5. 核对**：到 Releases 页确认三个附件都在、说明正文正常、版本号对，再下载一个 zip 解压试跑。
+### 核对
 
-改了内容但不想发版（比如补文档），只 commit 和 push，不要打 tag。一个 tag 对应一个 Release，重复 push 同一个 tag 不会覆盖旧 Release——要重发就删掉旧 tag 和 Release，改用新版本号（如 `v0.4.1`）。
+到 Releases 页确认三个附件都在、说明正文正常、版本号对，再下载一个 zip 解压试跑。
+
+改了内容但不想发版（比如补文档），只 commit 和 push，不要打 tag。一个 tag 对应一个 Release，重复 push 同一个 tag 不会覆盖旧 Release——要重发就删掉旧 tag 和 Release，改用新版本号（如 `v0.0.8`）。
 
 
 ## 参与贡献
