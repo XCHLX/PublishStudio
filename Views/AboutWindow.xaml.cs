@@ -61,13 +61,13 @@ public partial class AboutWindow : Window
     /// 取版本号的显示文本：读程序集里的 InformationalVersion，去掉可能被追加的「+提交哈希」。
     /// 读不到时退回 csproj 里的初始值，保证界面上永远有版本号。
     /// </summary>
-    /// <returns>形如 <c>0.04</c> 的版本文本（不含前缀 V）。</returns>
+    /// <returns>形如 <c>0.4.0</c> 的版本文本（不含前缀 V）。</returns>
     private static string AppVersion()
     {
         var raw = typeof(AboutWindow).Assembly
             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
 
-        if (string.IsNullOrWhiteSpace(raw)) return "0.04";
+        if (string.IsNullOrWhiteSpace(raw)) return "0.0.0";
 
         var plus = raw.IndexOf('+');
         return plus > 0 ? raw[..plus] : raw;
@@ -105,7 +105,7 @@ public partial class AboutWindow : Window
 public sealed class AboutItem
 {
     /// <param name="label">左侧标签，例如「版本」。</param>
-    /// <param name="value">右侧的值，例如「V0.04」或某个目录路径。</param>
+    /// <param name="value">右侧的值，例如「V0.4.0」或某个目录路径。</param>
     public AboutItem(string label, string value)
     {
         Label = label;

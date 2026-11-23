@@ -4,7 +4,7 @@
 ; 输出：release\PublishStudio-<版本>-setup.exe
 ;
 ; 本地编译（需先装 Inno Setup 6）：
-;   ISCC.exe /DMyAppVersion=0.04 deploy\PublishStudio.iss
+;   ISCC.exe /DMyAppVersion=0.4.0 deploy\PublishStudio.iss
 ; GitHub Actions 用构建机预装的 ISCC.exe，版本号由工作流传入。
 
 #define MyAppName "PublishStudio 发布工具"
@@ -12,7 +12,7 @@
 #define MyAppExeName "PublishStudio.exe"
 
 #ifndef MyAppVersion
-  #define MyAppVersion "0.04"
+  #define MyAppVersion "0.0.0"
 #endif
 
 [Setup]

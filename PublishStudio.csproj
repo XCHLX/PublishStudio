@@ -12,13 +12,15 @@
     <AssemblyName>PublishStudio</AssemblyName>
 
     <!--
-      版本号：界面上「帮助 → 关于」显示的是 InformationalVersion（拼成 V0.04）。
-      改版本只改这两行，别在 XAML 里另写一份。
-      Version 必须是规范化的三段式（NuGet 不接受 "0.04"），显示用的 "0.04" 放在 InformationalVersion。
+      版本号：界面上「帮助 → 关于」显示的是 InformationalVersion（拼成 V0.4.0）。
+      改版本只改这三行，别在 XAML 里另写一份。
+      Version 必须是规范化的三段式（NuGet 不接受 "0.4"），Info/FileVersion 跟着它走：
+      发布脚本会用 -p:InformationalVersion=<tag版本> 覆盖它，所以两边必须同格式，否则
+      本地编译显示 V0.4.0、CI 出来的显示另一个样子。
     -->
     <Version>0.4.0</Version>
     <FileVersion>0.4.0.0</FileVersion>
-    <InformationalVersion>0.04</InformationalVersion>
+    <InformationalVersion>0.4.0</InformationalVersion>
     <Authors>陈</Authors>
     <Company>陈</Company>
     <Product>发布工具</Product>

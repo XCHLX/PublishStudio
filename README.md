@@ -186,7 +186,7 @@ vite v5.0.11 building for production...
 |---|---|---|
 | `<Version>` | `0.4.0` | 必须规范三段式，tag 和文件名用它 |
 | `<FileVersion>` | `0.4.0.0` | Windows 文件版本，四段式 |
-| `<InformationalVersion>` | `0.04` | 「帮助 → 关于」里显示的 `V0.04` |
+| `<InformationalVersion>` | `0.4.0` | 「帮助 → 关于」里显示的 `V0.4.0`；发布时脚本会用 tag 版本覆盖它，所以格式必须和 `<Version>` 一致 |
 
 **2. 写版本说明**：新建 `docs/release-notes/v<版本>.md`（如 `v0.4.0.md`），写这次改了什么、下载哪个包、已知限制。这份文件会作为 Release 正文，GitHub 自动生成的 changelog 追加在它后面。**缺这个文件工作流会直接失败**，不会发出空说明的 Release。
 
